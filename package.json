@@ -1,0 +1,32 @@
+{
+  "name": "txt-api",
+  "version": "0.0.0",
+  "description": "A text website",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zjjw/txt-api.git"
+  },
+  "keywords": [
+    "text",
+    "txt"
+  ],
+  "author": "JJ Weber",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zjjw/txt-api/issues"
+  },
+  "homepage": "https://github.com/zjjw/txt-api#readme",
+  "dependencies": {
+    "bcrypt": "^0.8.5",
+    "config": "^1.17.1",
+    "koa": "^1.1.2",
+    "koa-jwt": "^1.1.1",
+    "koa-pg": "^0.24.1",
+    "koa-router": "^5.3.0",
+    "pg": "^4.4.3"
+  }
+}

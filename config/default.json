@@ -1,0 +1,8 @@
+{
+  "pg": {
+    "conStr": "postgres://user:password@localhost:5432/database"
+  },
+  "koa": {
+    "port": 3001
+  }
+}
