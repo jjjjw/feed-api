@@ -1,6 +1,6 @@
 {
   "pg": {
-    "conStr": "postgres://user:password@localhost:5432/database"
+    "conStr": "postgres://localhost:5432/txt"
   },
   "koa": {
     "port": 3001
