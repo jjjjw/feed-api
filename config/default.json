@@ -4,5 +4,8 @@
   },
   "koa": {
     "port": 3001
+  },
+  "jwt": {
+    "secret": "pizza"
   }
 }
