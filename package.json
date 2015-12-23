@@ -4,7 +4,7 @@
   "description": "A text website",
   "main": "index.js",
   "scripts": {
-    "start:dev": "babel-node index.js",
+    "start:dev": "nodemon index.js",
     "test": "mocha --compilers js:babel-register --recursive"
   },
   "repository": {
@@ -29,10 +29,12 @@
     "config": "^1.17.1",
     "jsonwebtoken": "^5.4.1",
     "koa": "^1.1.2",
+    "koa-cors": "0.0.16",
     "koa-json": "^1.1.1",
     "koa-json-body": "^4.0.0",
     "koa-jwt": "^1.1.1",
     "koa-router": "^5.3.0",
+    "koa-ssl": "^2.0.0",
     "pg": "^4.4.3",
     "postgres-gen": "^0.8.2",
     "thunkify": "^2.1.2"
@@ -42,6 +44,7 @@
     "babel-cli": "^6.3.17",
     "babel-register": "^6.3.13",
     "mocha": "^2.3.4",
+    "nodemon": "^1.8.1",
     "supertest": "^1.1.0"
   }
 }

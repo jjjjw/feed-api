@@ -16,27 +16,21 @@ function tearDown (done) {
 }
 
 function setUp (cb) {
-  var token
-
   request
     .post('/users')
     .send({'email' : 'new email', 'password' : 'new password'})
     .expect(201, (err, res) => {
-      token = res.body.token
-        cb(err, token)
+      cb(err)
     })
 }
 
 describe('profile routes', () => {
-
-  var token
   var profileId
 
   after(tearDown)
 
   before(done => {
-    setUp((err, userToken, userProfileId) => {
-      token = userToken
+    setUp((err) => {
       done()
     })
   })
@@ -46,7 +40,6 @@ describe('profile routes', () => {
       request
         .post('/profiles')
         .send({'name' : 'new name'})
-        .set('Authorization', 'Bearer ' + token)
         .expect(201, (err, res) => {
           assert.ok(res.body.id)
           done()

@@ -1,9 +1,8 @@
-import config from 'config'
 import createRouter from 'koa-router'
-import jwt from 'koa-jwt'
+import { hasValidToken } from '../middleware/auth'
 
 const router = createRouter({ prefix: '/profiles' })
-router.use(jwt({ secret: config.get('jwt.secret') }))
+router.use(hasValidToken)
 
 router.post('/', function *(next) {
   let { name } = this.request.body

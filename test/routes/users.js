@@ -6,7 +6,7 @@ import supertest from 'supertest'
 
 let request = supertest.agent(app.listen())
 
-function deleteUsers (done) {
+function tearDown (done) {
   pg.connect(config.get('pg.conStr'), (err, client, close) => {
     client.query('DELETE FROM profiles; DELETE FROM users;', (err, result) => {
       close()
@@ -14,40 +14,59 @@ function deleteUsers (done) {
     })
   })
 }
+function logIn (cb) {
+  request
+    .post('/users/login')
+    .send({'email' : 'new email', 'password' : 'new password'})
+    .expect(200, (err, res) => {
+      cb(err)
+    })
+}
 
 describe('user routes', () => {
 
   describe('user', () => {
-    var token
 
-    after(deleteUsers)
+    after(tearDown)
 
-    it('returns 201 and token when created', done => {
+    it('returns 201, id and role, when created', done => {
       request
         .post('/users')
         .send({'email' : 'new email', 'password' : 'new password'})
         .expect(201, (err, res) => {
-          assert.ok(res.body.token)
+          assert.ok(res.body.id)
+          assert.ok(res.body.role)
           done()
         })
     })
 
-    it('returns 200 and token when logged in', done => {
+    it('returns 200, id and role when logged in', done => {
       request
         .post('/users/login')
         .send({'email' : 'new email', 'password' : 'new password'})
         .expect(200, (err, res) => {
-          assert.ok(res.body.token)
-          token = res.body.token
+          assert.ok(res.body.id)
+          assert.ok(res.body.role)
+          done()
+        })
+    })
+
+    it('returns 200 when logged out', done => {
+      request
+        .post('/users/logout')
+        .send({})
+        .expect(200, (err, res) => {
           done()
         })
     })
 
     describe('profiles', () => {
+
+      before(logIn)
+
       it('returns 200 and profiles when fetched', done => {
         request
           .get('/users/profiles')
-          .set('Authorization', 'Bearer ' + token)
           .expect(200, (err, res) => {
             assert.ok(res.body.profiles)
             done()

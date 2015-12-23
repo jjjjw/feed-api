@@ -16,35 +16,30 @@ function tearDown (done) {
 }
 
 function setUp (cb) {
-  var token
   var profile
 
   request
     .post('/users')
     .send({'email' : 'new email', 'password' : 'new password'})
     .expect(201, (err, res) => {
-      token = res.body.token
       request
         .post('/profiles')
         .send({'name' : 'new name'})
-        .set('Authorization', 'Bearer ' + token)
         .expect(201, (err, res) => {
           profile = res.body.id
-          cb(err, token, profile)
+          cb(err, profile)
         })
     })
 }
 
 describe('post routes', () => {
-  var token
   var profileId
 
   after(tearDown)
 
   before(done => {
-    setUp((err, userToken, userProfileId) => {
-      token = userToken
-      profileId = userProfileId
+    setUp((err, profile) => {
+      profileId = profile
       done()
     })
   })
@@ -56,7 +51,6 @@ describe('post routes', () => {
       request
         .post('/posts')
         .send({'content': {"pizza": true}, profileId})
-        .set('Authorization', 'Bearer ' + token)
         .expect(201, (err, res) => {
           assert.ok(res.body.id)
           postId = res.body.id

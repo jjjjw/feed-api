@@ -1,11 +1,11 @@
 import config from 'config'
 import createRouter from 'koa-router'
 import crypto from 'crypto'
-import jwt from 'koa-jwt'
+import { hasValidToken } from '../middleware/auth'
 
 const router = createRouter({ prefix: '/posts' })
 
-router.post('/', jwt({ secret: config.get('jwt.secret') }), function *(next) {
+router.post('/', hasValidToken, function *(next) {
   let { content, profileId } = this.request.body
   let contentJson = JSON.stringify(content)
 
@@ -18,6 +18,8 @@ router.post('/', jwt({ secret: config.get('jwt.secret') }), function *(next) {
 })
 
 router.get('/:id', function *(next) {
+  // TODO: cipher id
+
   let id = this.params.id
 
   let post = yield this.pg.queryOne(`SELECT content, profile_id FROM posts WHERE id = ${id};`)
