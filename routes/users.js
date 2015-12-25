@@ -67,6 +67,11 @@ router.post('/logout', hasValidToken, function *(next) {
   })
 })
 
+router.get('/', hasValidToken, function *(next) {
+  let { user } = this.state
+  this.body = user
+})
+
 router.get('/profiles', hasValidToken, function *(next) {
   let id = this.state.user.id
 

@@ -51,6 +51,16 @@ describe('user routes', () => {
         })
     })
 
+    it('returns 200, id and role for current user', done => {
+      request
+        .get('/users')
+        .expect(200, (err, res) => {
+          assert.ok(res.body.id)
+          assert.ok(res.body.role)
+          done()
+        })
+    })
+
     it('returns 200 when logged out', done => {
       request
         .post('/users/logout')
