@@ -17,7 +17,8 @@ const pgCon = pg(config.get('pg.conStr'))
 
 app.use(ssl())
 app.use(cors({
-  origin: config.get('urls.webBase')
+  origin: config.get('urls.webBase'),
+  credentials: true
 }))
 
 app.use(jsonBody({ limit: '10kb' }))
@@ -35,7 +36,6 @@ app.use(users.routes())
 
 // Middleware below this line is only reached if JWT token is valid
 app.use(hasValidToken)
-
 
 if (!module.parent) {
   app.listen(config.get('koa.port'))

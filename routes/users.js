@@ -30,7 +30,9 @@ router.post('/', function *(next) {
 
   let token = yield createToken(user)
 
-  this.cookies.set(config.get('jwt.cookie'), token)
+  this.cookies.set(config.get('jwt.cookie'), token, {
+    expires: new Date(new Date().setMonth(new Date().getMonth() + 1))
+  })
 
   this.status = 201
   this.response.body = user
@@ -52,7 +54,9 @@ router.post('/login', function *(next) {
     let user = { role: userData.role, id: userData.id }
     let token = yield createToken(user)
 
-    this.cookies.set(config.get('jwt.cookie'), token)
+    this.cookies.set(config.get('jwt.cookie'), token, {
+      expires: new Date(new Date().setMonth(new Date().getMonth() + 1))
+    })
 
     this.response.body = user
   } else {
