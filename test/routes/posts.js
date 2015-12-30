@@ -26,7 +26,7 @@ function setUp (cb) {
         .post('/profiles')
         .send({'name' : 'new name'})
         .expect(201, (err, res) => {
-          profile = res.body.id
+          profile = res.body.profile.id
           cb(err, profile)
         })
     })
@@ -52,8 +52,9 @@ describe('post routes', () => {
         .post('/posts')
         .send({'content': {"pizza": true}, profileId})
         .expect(201, (err, res) => {
-          assert.ok(res.body.id)
-          postId = res.body.id
+          assert.ok(res.body.post)
+          assert.ok(res.body.post.id)
+          postId = res.body.post.id
           done()
         })
     })
@@ -62,8 +63,9 @@ describe('post routes', () => {
       request
         .get('/posts/' + postId)
         .expect(200, (err, res) => {
-          assert.deepEqual(res.body.content, {"pizza": true})
-          assert.equal(res.body.profileId, profileId)
+          assert.ok(res.body.post)
+          assert.deepEqual(res.body.post.content, {"pizza": true})
+          assert.equal(res.body.post.profileId, profileId)
           done()
         })
     })

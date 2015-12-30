@@ -13,7 +13,7 @@ router.post('/', function *(next) {
   let profile = yield this.pg.queryOne(`INSERT INTO profiles (name, user_id) VALUES ('${name}', ${id}) RETURNING id;`)
 
   this.status = 201
-  this.response.body = { id: profile.id }
+  this.response.body = { profile: { id: profile.id }}
 })
 
 export default router

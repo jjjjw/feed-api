@@ -34,8 +34,9 @@ describe('user routes', () => {
         .post('/users')
         .send({'email' : 'new email', 'password' : 'new password'})
         .expect(201, (err, res) => {
-          assert.ok(res.body.id)
-          assert.ok(res.body.role)
+          assert.ok(res.body.user)
+          assert.ok(res.body.user.id)
+          assert.ok(res.body.user.role)
           done()
         })
     })
@@ -45,8 +46,9 @@ describe('user routes', () => {
         .post('/users/login')
         .send({'email' : 'new email', 'password' : 'new password'})
         .expect(200, (err, res) => {
-          assert.ok(res.body.id)
-          assert.ok(res.body.role)
+          assert.ok(res.body.user)
+          assert.ok(res.body.user.id)
+          assert.ok(res.body.user.role)
           done()
         })
     })
@@ -55,8 +57,9 @@ describe('user routes', () => {
       request
         .get('/users')
         .expect(200, (err, res) => {
-          assert.ok(res.body.id)
-          assert.ok(res.body.role)
+          assert.ok(res.body.user)
+          assert.ok(res.body.user.id)
+          assert.ok(res.body.user.role)
           done()
         })
     })
@@ -68,20 +71,6 @@ describe('user routes', () => {
         .expect(200, (err, res) => {
           done()
         })
-    })
-
-    describe('profiles', () => {
-
-      before(logIn)
-
-      it('returns 200 and profiles when fetched', done => {
-        request
-          .get('/users/profiles')
-          .expect(200, (err, res) => {
-            assert.ok(res.body.profiles)
-            done()
-          })
-      })
     })
   })
 })

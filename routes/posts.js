@@ -14,7 +14,7 @@ router.post('/', hasValidToken, function *(next) {
   let post = yield this.pg.queryOne(`INSERT INTO posts (content, profile_id) VALUES ('${contentJson}', ${profileId}) RETURNING id;`)
 
   this.status = 201
-  this.response.body = { id: post.id }
+  this.response.body = { post: { id: post.id }}
 })
 
 router.get('/:id', function *(next) {
@@ -27,8 +27,11 @@ router.get('/:id', function *(next) {
   // TODO: handle not found
 
   this.response.body = {
-    content: post.content,
-    profileId: post.profile_id
+    post: {
+      id,
+      content: post.content,
+      profileId: post.profile_id
+    }
   }
 })
 

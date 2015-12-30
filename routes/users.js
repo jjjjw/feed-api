@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt'
+import camelCase from 'camelcase'
 import config from 'config'
 import createRouter from 'koa-router'
 import jwt from 'jsonwebtoken'
@@ -18,6 +19,10 @@ function createToken (payload, opts) {
   }
 }
 
+function *getProfiles (userId) {
+  return (yield this.pg.query(`SELECT name, id FROM profiles WHERE user_id = ${userId};`)).rows
+}
+
 router.post('/', function *(next) {
   let { email, password } = this.request.body
 
@@ -35,7 +40,9 @@ router.post('/', function *(next) {
   })
 
   this.status = 201
-  this.response.body = user
+  this.response.body = {
+    user
+  }
 })
 
 router.post('/login', function *(next) {
@@ -53,12 +60,21 @@ router.post('/login', function *(next) {
   if (validPw) {
     let user = { role: userData.role, id: userData.id }
     let token = yield createToken(user)
+    let profiles = yield getProfiles.call(this, user.id)
+
+    user.profiles = profiles.map(profile => profile.id)
+
+    // TODO: store in db
+    user.activeProfile = user.profiles[0]
 
     this.cookies.set(config.get('jwt.cookie'), token, {
       expires: new Date(new Date().setMonth(new Date().getMonth() + 1))
     })
 
-    this.response.body = user
+    this.response.body = {
+      user,
+      profiles
+    }
   } else {
     this.status = 401
   }
@@ -73,15 +89,15 @@ router.post('/logout', hasValidToken, function *(next) {
 
 router.get('/', hasValidToken, function *(next) {
   let { user } = this.state
-  this.body = user
-})
+  let profiles = yield getProfiles.call(this, user.id)
 
-router.get('/profiles', hasValidToken, function *(next) {
-  let id = this.state.user.id
+  user.profiles = profiles.map(profile => profile.id)
 
-  let profiles = (yield this.pg.query(`SELECT name, id FROM profiles WHERE user_id = ${id};`)).rows
+  // TODO: store in db
+  user.activeProfile = user.profiles[0]
 
-  this.response.body = {
+  this.body = {
+    user,
     profiles
   }
 })

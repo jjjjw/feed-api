@@ -41,7 +41,8 @@ describe('profile routes', () => {
         .post('/profiles')
         .send({'name' : 'new name'})
         .expect(201, (err, res) => {
-          assert.ok(res.body.id)
+          assert.ok(res.body.profile)
+          assert.ok(res.body.profile.id)
           done()
         })
     })
