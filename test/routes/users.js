@@ -41,7 +41,7 @@ describe('user routes', () => {
         .expect(400, (err, res) => {
           assert.ifError(err)
           assert.ok(res.error)
-          assert.equal(res.error.text, 'INVALID_EMAIL')
+          assert.equal(res.body.error.type, 'INVALID_EMAIL')
           done()
         })
     })
@@ -53,7 +53,7 @@ describe('user routes', () => {
         .expect(400, (err, res) => {
           assert.ifError(err)
           assert.ok(res.error)
-          assert.equal(res.error.text, 'INVALID_PASSWORD')
+          assert.equal(res.body.error.type, 'INVALID_PASSWORD')
           done()
         })
     })
@@ -67,7 +67,7 @@ describe('user routes', () => {
           .expect(400, (err, res) => {
             assert.ifError(err)
             assert.ok(res.error)
-            assert.equal(res.error.text, 'DUPLICATE_EMAIL')
+            assert.equal(res.body.error.type, 'DUPLICATE_EMAIL')
             done()
           })
       })
@@ -107,7 +107,7 @@ describe('user routes', () => {
         .expect(400, (err, res) => {
           assert.ifError(err)
           assert.ok(res.error)
-          assert.equal(res.error.text, 'INCORRECT_INFO')
+          assert.equal(res.body.error.type, 'INCORRECT_INFO')
           done()
         })
     })
@@ -119,7 +119,7 @@ describe('user routes', () => {
         .expect(400, (err, res) => {
           assert.ifError(err)
           assert.ok(res.error)
-          assert.equal(res.error.text, 'INCORRECT_INFO')
+          assert.equal(res.body.error.type, 'INCORRECT_INFO')
           done()
         })
     })
@@ -131,7 +131,7 @@ describe('user routes', () => {
         .expect(400, (err, res) => {
           assert.ifError(err)
           assert.ok(res.error)
-          assert.equal(res.error.text, 'INCORRECT_INFO')
+          assert.equal(res.body.error.type, 'INCORRECT_INFO')
           done()
         })
     })
@@ -143,7 +143,7 @@ describe('user routes', () => {
         .expect(400, (err, res) => {
           assert.ifError(err)
           assert.ok(res.error)
-          assert.equal(res.error.text, 'INCORRECT_INFO')
+          assert.equal(res.body.error.type, 'INCORRECT_INFO')
           done()
         })
     })
@@ -206,6 +206,7 @@ describe('user routes', () => {
         .send({})
         .expect(401, (err, res) => {
           assert.ifError(err)
+          assert.equal(res.body.error.type, 'UNAUTHORIZED')
           done()
         })
     })
@@ -215,6 +216,7 @@ describe('user routes', () => {
         .get('/users')
         .expect(401, (err, res) => {
           assert.ifError(err)
+          assert.equal(res.body.error.type, 'UNAUTHORIZED')
           done()
         })
     })

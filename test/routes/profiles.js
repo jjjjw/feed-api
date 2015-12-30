@@ -60,7 +60,7 @@ describe('profile routes', () => {
         .expect(400, (err, res) => {
           assert.ifError(err)
           assert.ok(res.error)
-          assert.equal(res.error.text, 'DUPLICATE_NAME')
+          assert.equal(res.body.error.type, 'DUPLICATE_NAME')
           done()
         })
     })
@@ -84,7 +84,7 @@ describe('profile routes', () => {
         .expect(400, (err, res) => {
           assert.ifError(err)
           assert.ok(res.error)
-          assert.equal(res.error.text, 'INVALID_USER')
+          assert.equal(res.body.error.type, 'INVALID_USER')
           done()
         })
     })

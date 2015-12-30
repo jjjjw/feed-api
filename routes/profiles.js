@@ -13,9 +13,9 @@ router.post('/', function *(next) {
     profile = yield this.pg.queryOne(`INSERT INTO profiles (name, user_id) VALUES ('${name}', ${id}) RETURNING id;`)
   } catch (err) {
     if (err.code === '23505') {
-      this.throw(400, 'DUPLICATE_NAME')
+      this.throw(400, {type: 'DUPLICATE_NAME'})
     } else if (err.code === '23503') {
-      this.throw(400, 'INVALID_USER')
+      this.throw(400, {type: 'INVALID_USER'})
     }
   }
 

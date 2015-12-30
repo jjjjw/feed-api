@@ -15,6 +15,30 @@ import { hasValidToken } from './middleware/auth'
 const app = koa()
 const pgCon = pg(config.get('pg.conStr'))
 
+app.use(function *(next){
+  try {
+    yield next
+  } catch (err) {
+    if (401 == err.status) {
+      this.status = err.status
+      this.body = {
+        error: {
+          type: 'UNAUTHORIZED'
+        }
+      }
+    } else if (err.type) {
+      this.status = err.status
+      this.body = {
+        error: {
+          type: err.type
+        }
+      }
+    } else {
+      throw err
+    }
+  }
+})
+
 app.use(ssl())
 app.use(cors({
   origin: config.get('urls.webBase'),

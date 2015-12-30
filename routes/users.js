@@ -30,8 +30,8 @@ function * getProfiles (userId) {
 router.post('/', function *(next) {
   const { email, password } = this.request.body
 
-  this.assert(emailValidator.validate(email), 400, 'INVALID_EMAIL')
-  this.assert(validatePassword(password), 400, 'INVALID_PASSWORD')
+  this.assert(emailValidator.validate(email), 400, {type: 'INVALID_EMAIL'})
+  this.assert(validatePassword(password), 400, {type: 'INVALID_PASSWORD'})
 
   const hash = yield bcryptHash(password, 10)
   const insertUser = `INSERT INTO users (email, password) VALUES ('${email}', '${hash}') RETURNING id, role;`
@@ -41,7 +41,7 @@ router.post('/', function *(next) {
     user = yield this.pg.queryOne(insertUser)
   } catch (err) {
     if (err.code === '23505') {
-      this.throw(400, 'DUPLICATE_EMAIL')
+      this.throw(400, {type: 'DUPLICATE_EMAIL'})
     }
   }
 
@@ -60,21 +60,18 @@ router.post('/', function *(next) {
 router.post('/login', function *(next) {
   const { email, password } = this.request.body
 
-  this.assert(emailValidator.validate(email), 400, 'INCORRECT_INFO')
-  this.assert(validatePassword(password), 400, 'INCORRECT_INFO')
+  this.assert(emailValidator.validate(email), 400, {type: 'INCORRECT_INFO'})
+  this.assert(validatePassword(password), 400, {type: 'INCORRECT_INFO'})
 
   const selectUser = `SELECT password, id, role FROM users WHERE email = '${email}';`
-  let userData
-  try {
-    userData = yield this.pg.queryOne(selectUser)
-  } catch (err) {
-    if (err === 'No rows were returned where at least one was expected.') {
-      this.throw(400, 'INCORRECT_INFO')
-    }
+  let userData = (yield this.pg.query(selectUser)).rows
+  if (!userData.length) {
+    this.throw(400, {type: 'INCORRECT_INFO'})
   }
+  userData = userData[0]
 
   const validPw = yield bcryptCompare(password, userData.password)
-  this.assert(validPw, 400, 'INCORRECT_INFO')
+  this.assert(validPw, 400, {type: 'INCORRECT_INFO'})
 
   const user = { role: userData.role, id: userData.id }
   const token = yield createToken(user)
