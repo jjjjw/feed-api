@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
-import camelCase from 'camelcase'
 import config from 'config'
 import createRouter from 'koa-router'
+import emailValidator from 'email-validator'
 import jwt from 'jsonwebtoken'
 import thunkify from 'thunkify'
 import { hasValidToken } from '../middleware/auth'
@@ -19,21 +19,33 @@ function createToken (payload, opts) {
   }
 }
 
-function *getProfiles (userId) {
+function validatePassword (pw) {
+  return pw.length >= 8
+}
+
+function * getProfiles (userId) {
   return (yield this.pg.query(`SELECT name, id FROM profiles WHERE user_id = ${userId};`)).rows
 }
 
 router.post('/', function *(next) {
-  let { email, password } = this.request.body
+  const { email, password } = this.request.body
 
-  // TODO: validate
+  this.assert(emailValidator.validate(email), 400, 'INVALID_EMAIL')
+  this.assert(validatePassword(password), 400, 'INVALID_PASSWORD')
 
-  let hash = yield bcryptHash(password, 10)
+  const hash = yield bcryptHash(password, 10)
+  const insertUser = `INSERT INTO users (email, password) VALUES ('${email}', '${hash}') RETURNING id, role;`
 
-  let insertUser = `INSERT INTO users (email, password) VALUES ('${email}', '${hash}') RETURNING id, role;`
-  let user = yield this.pg.queryOne(insertUser)
+  let user
+  try {
+    user = yield this.pg.queryOne(insertUser)
+  } catch (err) {
+    if (err.code === '23505') {
+      this.throw(400, 'DUPLICATE_EMAIL')
+    }
+  }
 
-  let token = yield createToken(user)
+  const token = yield createToken(user)
 
   this.cookies.set(config.get('jwt.cookie'), token, {
     expires: new Date(new Date().setMonth(new Date().getMonth() + 1))
@@ -46,37 +58,40 @@ router.post('/', function *(next) {
 })
 
 router.post('/login', function *(next) {
-  let { email, password } = this.request.body
+  const { email, password } = this.request.body
 
-  // TODO: validate
+  this.assert(emailValidator.validate(email), 400, 'INCORRECT_INFO')
+  this.assert(validatePassword(password), 400, 'INCORRECT_INFO')
 
-  let selectUser = `SELECT password, id, role FROM users WHERE email = '${email}';`
-  let userData = yield this.pg.queryOne(selectUser)
-
-  // TODO: handle no user
-
-  let validPw = yield bcryptCompare(password, userData.password)
-
-  if (validPw) {
-    let user = { role: userData.role, id: userData.id }
-    let token = yield createToken(user)
-    let profiles = yield getProfiles.call(this, user.id)
-
-    user.profiles = profiles.map(profile => profile.id)
-
-    // TODO: store in db
-    user.activeProfile = user.profiles[0]
-
-    this.cookies.set(config.get('jwt.cookie'), token, {
-      expires: new Date(new Date().setMonth(new Date().getMonth() + 1))
-    })
-
-    this.response.body = {
-      user,
-      profiles
+  const selectUser = `SELECT password, id, role FROM users WHERE email = '${email}';`
+  let userData
+  try {
+    userData = yield this.pg.queryOne(selectUser)
+  } catch (err) {
+    if (err === 'No rows were returned where at least one was expected.') {
+      this.throw(400, 'INCORRECT_INFO')
     }
-  } else {
-    this.status = 401
+  }
+
+  const validPw = yield bcryptCompare(password, userData.password)
+  this.assert(validPw, 400, 'INCORRECT_INFO')
+
+  const user = { role: userData.role, id: userData.id }
+  const token = yield createToken(user)
+  const profiles = yield getProfiles.call(this, user.id)
+
+  user.profiles = profiles.map(profile => profile.id)
+
+  // TODO: store in db
+  user.activeProfile = user.profiles[0]
+
+  this.cookies.set(config.get('jwt.cookie'), token, {
+    expires: new Date(new Date().setMonth(new Date().getMonth() + 1))
+  })
+
+  this.response.body = {
+    user,
+    profiles
   }
 })
 
@@ -85,11 +100,12 @@ router.post('/logout', hasValidToken, function *(next) {
     overwrite: true,
     expires: new Date(0)
   })
+  this.status = 200
 })
 
 router.get('/', hasValidToken, function *(next) {
-  let { user } = this.state
-  let profiles = yield getProfiles.call(this, user.id)
+  const { user } = this.state
+  const profiles = yield getProfiles.call(this, user.id)
 
   user.profiles = profiles.map(profile => profile.id)
 

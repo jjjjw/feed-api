@@ -1,3 +1,5 @@
+/* global it, describe, after, before */
+
 import app from '../../index.js'
 import assert from 'assert'
 import config from 'config'
@@ -8,9 +10,12 @@ let request = supertest.agent(app.listen())
 
 function tearDown (done) {
   pg.connect(config.get('pg.conStr'), (err, client, close) => {
+    if (err) {
+      done(err)
+    }
     client.query('DELETE FROM posts; DELETE FROM profiles; DELETE FROM users;', (err, result) => {
       close()
-      done()
+      done(err)
     })
   })
 }
@@ -20,11 +25,14 @@ function setUp (cb) {
 
   request
     .post('/users')
-    .send({'email' : 'new email', 'password' : 'new password'})
+    .send({'email': 'new@gmail.com', 'password': 'new password'})
     .expect(201, (err, res) => {
+      if (err) {
+        cb(err)
+      }
       request
         .post('/profiles')
-        .send({'name' : 'new name'})
+        .send({'name': 'new name'})
         .expect(201, (err, res) => {
           profile = res.body.profile.id
           cb(err, profile)
@@ -39,6 +47,9 @@ describe('post routes', () => {
 
   before(done => {
     setUp((err, profile) => {
+      if (err) {
+        done(err)
+      }
       profileId = profile
       done()
     })
@@ -50,8 +61,9 @@ describe('post routes', () => {
     it('returns 201 and id when created', done => {
       request
         .post('/posts')
-        .send({'content': {"pizza": true}, profileId})
+        .send({'content': {'pizza': true}, profileId})
         .expect(201, (err, res) => {
+          assert.ifError(err)
           assert.ok(res.body.post)
           assert.ok(res.body.post.id)
           postId = res.body.post.id
@@ -63,8 +75,9 @@ describe('post routes', () => {
       request
         .get('/posts/' + postId)
         .expect(200, (err, res) => {
+          assert.ifError(err)
           assert.ok(res.body.post)
-          assert.deepEqual(res.body.post.content, {"pizza": true})
+          assert.deepEqual(res.body.post.content, {'pizza': true})
           assert.equal(res.body.post.profileId, profileId)
           done()
         })

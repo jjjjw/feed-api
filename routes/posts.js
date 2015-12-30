@@ -1,6 +1,4 @@
-import config from 'config'
 import createRouter from 'koa-router'
-import crypto from 'crypto'
 import { hasValidToken } from '../middleware/auth'
 
 const router = createRouter({ prefix: '/posts' })
@@ -14,7 +12,7 @@ router.post('/', hasValidToken, function *(next) {
   let post = yield this.pg.queryOne(`INSERT INTO posts (content, profile_id) VALUES ('${contentJson}', ${profileId}) RETURNING id;`)
 
   this.status = 201
-  this.response.body = { post: { id: post.id }}
+  this.response.body = { post: { id: post.id } }
 })
 
 router.get('/:id', function *(next) {

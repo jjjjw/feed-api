@@ -5,15 +5,26 @@ const router = createRouter({ prefix: '/profiles' })
 router.use(hasValidToken)
 
 router.post('/', function *(next) {
-  let { name } = this.request.body
-  let id = this.state.user.id
+  const { name } = this.request.body
+  const id = this.state.user.id
 
-  // TODO: validate
-
-  let profile = yield this.pg.queryOne(`INSERT INTO profiles (name, user_id) VALUES ('${name}', ${id}) RETURNING id;`)
+  let profile
+  try {
+    profile = yield this.pg.queryOne(`INSERT INTO profiles (name, user_id) VALUES ('${name}', ${id}) RETURNING id;`)
+  } catch (err) {
+    if (err.code === '23505') {
+      this.throw(400, 'DUPLICATE_NAME')
+    } else if (err.code === '23503') {
+      this.throw(400, 'INVALID_USER')
+    }
+  }
 
   this.status = 201
-  this.response.body = { profile: { id: profile.id }}
+  this.response.body = {
+    profile: {
+      id: profile.id
+    }
+  }
 })
 
 export default router
