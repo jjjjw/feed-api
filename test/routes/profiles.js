@@ -41,7 +41,7 @@ describe('profile routes', () => {
   })
 
   describe('profile', () => {
-    it('returns id when created', done => {
+    it('returns id and slug when created', done => {
       request
         .post('/profiles')
         .send({'name': 'new name'})
@@ -49,6 +49,8 @@ describe('profile routes', () => {
           assert.ifError(err)
           assert.ok(res.body.profile)
           assert.ok(res.body.profile.id)
+          assert.ok(res.body.profile.slug)
+          assert.equal(res.body.profile.slug, 'new-name')
           done()
         })
     })
@@ -61,6 +63,18 @@ describe('profile routes', () => {
           assert.ifError(err)
           assert.ok(res.error)
           assert.equal(res.body.error.type, 'DUPLICATE_NAME')
+          done()
+        })
+    })
+
+    it('ensures name and slug are less that 80 characters when created', done => {
+      request
+        .post('/profiles')
+        .send({'name': 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula e'})
+        .expect(400, (err, res) => {
+          assert.ifError(err)
+          assert.ok(res.error)
+          assert.equal(res.body.error.type, 'INVALID_NAME')
           done()
         })
     })

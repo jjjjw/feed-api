@@ -23,8 +23,30 @@ function validatePassword (pw) {
   return pw.length >= 8
 }
 
-function * getProfiles (userId) {
-  return (yield this.pg.query(`SELECT name, id FROM profiles WHERE user_id = ${userId};`)).rows
+function * getProfiles (pg, userId) {
+  return (yield pg.query(`SELECT name, id, user_default FROM profiles WHERE user_id = ${userId};`)).rows
+}
+
+function adaptProfile (profile) {
+  return {
+    id: profile.id,
+    name: profile.name,
+    isDefault: profile.user_default
+  }
+}
+
+function findDefaultProfile (profiles) {
+  let initial
+  if (profiles[0]) {
+    initial = profiles[0].id
+  }
+  return profiles.reduce((defaultId, profile) => {
+    if (profile.isDefault) {
+      return profile.id
+    } else {
+      return defaultId
+    }
+  }, initial)
 }
 
 router.post('/', function *(next) {
@@ -75,12 +97,10 @@ router.post('/login', function *(next) {
 
   const user = { role: userData.role, id: userData.id }
   const token = yield createToken(user)
-  const profiles = yield getProfiles.call(this, user.id)
+  const profiles = (yield getProfiles(this.pg, user.id)).map(adaptProfile)
 
   user.profiles = profiles.map(profile => profile.id)
-
-  // TODO: store in db
-  user.activeProfile = user.profiles[0]
+  user.activeProfile = findDefaultProfile(profiles)
 
   this.cookies.set(config.get('jwt.cookie'), token, {
     expires: new Date(new Date().setMonth(new Date().getMonth() + 1))
@@ -102,12 +122,10 @@ router.post('/logout', hasValidToken, function *(next) {
 
 router.get('/', hasValidToken, function *(next) {
   const { user } = this.state
-  const profiles = yield getProfiles.call(this, user.id)
+  const profiles = (yield getProfiles(this.pg, user.id)).map(adaptProfile)
 
   user.profiles = profiles.map(profile => profile.id)
-
-  // TODO: store in db
-  user.activeProfile = user.profiles[0]
+  user.activeProfile = findDefaultProfile(profiles)
 
   this.body = {
     user,
