@@ -2,10 +2,6 @@ import createRouter from 'koa-router'
 
 const router = createRouter({ prefix: '/material' })
 
-function generateSlug (name) {
-  return slugify(name)
-}
-
 router.post('/', function *(next) {
   const { content } = this.request.body
 

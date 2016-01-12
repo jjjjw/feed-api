@@ -39,13 +39,11 @@ function setUp (done) {
 }
 
 describe('posts', () => {
-
   after(tearDown)
 
   before(setUp)
 
   describe('post', () => {
-
     it('can be fetched by slug', done => {
       request
         .get('/posts/b53459b4-691c-42ec-a275-b59779dc0cc0')

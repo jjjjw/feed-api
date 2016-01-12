@@ -37,7 +37,6 @@ function setUp (done) {
 }
 
 describe('material', () => {
-
   after(tearDown)
 
   before(setUp)
