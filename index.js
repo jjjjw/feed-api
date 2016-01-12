@@ -7,42 +7,15 @@ import jsonBody from 'koa-json-body'
 import koa from 'koa'
 import pg from 'postgres-gen'
 import posts from './routes/posts'
-import profiles from './routes/profiles'
+import material from './routes/material'
 import ssl from 'koa-ssl'
-import users from './routes/users'
-import { hasValidToken } from './middleware/auth'
 
 const app = koa()
 const pgCon = pg(config.get('pg.conStr'))
 
-app.use(function *(next){
-  try {
-    yield next
-  } catch (err) {
-    if (401 == err.status) {
-      this.status = err.status
-      this.body = {
-        error: {
-          type: 'UNAUTHORIZED'
-        }
-      }
-    } else if (err.type) {
-      this.status = err.status
-      this.body = {
-        error: {
-          type: err.type
-        }
-      }
-    } else {
-      throw err
-    }
-  }
-})
-
 app.use(ssl())
 app.use(cors({
-  origin: config.get('urls.webBase'),
-  credentials: true
+  origin: config.get('urls.webBase')
 }))
 
 app.use(jsonBody({ limit: '10kb' }))
@@ -53,13 +26,8 @@ app.use(function *(next) {
   yield next
 })
 
-// Unprotected middleware
 app.use(posts.routes())
-app.use(profiles.routes())
-app.use(users.routes())
-
-// Middleware below this line is only reached if JWT token is valid
-app.use(hasValidToken)
+app.use(material.routes())
 
 if (!module.parent) {
   app.listen(config.get('koa.port'))

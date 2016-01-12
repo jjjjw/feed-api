@@ -1,5 +1,4 @@
-CREATE TABLE posts (
+CREATE TABLE material (
   id SERIAL PRIMARY KEY,
-  slug uuid,
   content text
 );

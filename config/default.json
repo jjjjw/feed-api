@@ -5,10 +5,6 @@
   "koa": {
     "port": 3001
   },
-  "jwt": {
-    "secret": "pizza",
-    "cookie": "token"
-  },
   "urls": {
     "apiBase": "http://localhost:3001",
     "webBase": "http://localhost:3000"

@@ -5,80 +5,55 @@ import assert from 'assert'
 import config from 'config'
 import pg from 'pg'
 import supertest from 'supertest'
+import fs from 'fs'
+import path from 'path'
 
-let request = supertest.agent(app.listen())
+const request = supertest.agent(app.listen())
+
+const postsTable = fs.readFileSync(path.join(__dirname, '../../sql/tables/posts.sql'), 'utf8')
+
+const postFixture = 'INSERT INTO posts (content, slug) VALUES (\'The sky was the color of television tuned to a dead channel.\', \'b53459b4-691c-42ec-a275-b59779dc0cc0\');'
 
 function tearDown (done) {
   pg.connect(config.get('pg.conStr'), (err, client, close) => {
     if (err) {
       done(err)
     }
-    client.query('DELETE FROM posts; DELETE FROM profiles; DELETE FROM users;', (err, result) => {
+    client.query('DROP TABLE posts;', (err, result) => {
       close()
       done(err)
     })
   })
 }
 
-function setUp (cb) {
-  var profile
-
-  request
-    .post('/users')
-    .send({'email': 'new@gmail.com', 'password': 'new password'})
-    .expect(201, (err, res) => {
-      if (err) {
-        cb(err)
-      }
-      request
-        .post('/profiles')
-        .send({'name': 'new name'})
-        .expect(201, (err, res) => {
-          profile = res.body.profile.id
-          cb(err, profile)
-        })
+function setUp (done) {
+  pg.connect(config.get('pg.conStr'), (err, client, close) => {
+    if (err) {
+      done(err)
+    }
+    client.query(`${postsTable}${postFixture}`, (err, result) => {
+      close()
+      done(err)
     })
+  })
 }
 
-describe('post routes', () => {
-  var profileId
+describe('posts', () => {
 
   after(tearDown)
 
-  before(done => {
-    setUp((err, profile) => {
-      if (err) {
-        done(err)
-      }
-      profileId = profile
-      done()
-    })
-  })
+  before(setUp)
 
   describe('post', () => {
-    var postId
 
-    it('returns 201 and id when created', done => {
+    it('can be fetched by slug', done => {
       request
-        .post('/posts')
-        .send({'content': {'pizza': true}, profileId})
-        .expect(201, (err, res) => {
-          assert.ifError(err)
-          assert.ok(res.body.post)
-          assert.ok(res.body.post.id)
-          postId = res.body.post.id
-          done()
-        })
-    })
-
-    it('returns 200, content, and profile id when fetched', done => {
-      request
-        .get('/posts/' + postId)
+        .get('/posts/b53459b4-691c-42ec-a275-b59779dc0cc0')
         .expect(200, (err, res) => {
           assert.ifError(err)
           assert.ok(res.body.post)
-          assert.deepEqual(res.body.post.content, {'pizza': true})
-          assert.equal(res.body.post.profileId, profileId)
+          assert.ok(res.body.post.content)
+          assert.equal(res.body.post.content, 'The sky was the color of television tuned to a dead channel.')
           done()
         })
     })
