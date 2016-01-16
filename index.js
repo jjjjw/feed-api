@@ -1,13 +1,10 @@
-import 'babel-polyfill'
-
 import config from 'config'
 import cors from 'koa-cors'
 import json from 'koa-json'
 import jsonBody from 'koa-json-body'
 import koa from 'koa'
-import pg from 'postgres-gen'
-import posts from './routes/posts'
 import material from './routes/material'
+import pg from 'postgres-gen'
 import ssl from 'koa-ssl'
 
 const app = koa()
@@ -26,7 +23,6 @@ app.use(function *(next) {
   yield next
 })
 
-app.use(posts.routes())
 app.use(material.routes())
 
 if (!module.parent) {

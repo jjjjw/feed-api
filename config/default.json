@@ -8,5 +8,11 @@
   "urls": {
     "apiBase": "http://localhost:3001",
     "webBase": "http://localhost:3000"
+  },
+  "twitter": {
+    "consumer_key": "hello",
+    "consumer_secret": "hello",
+    "access_token_key": "hello",
+    "access_token_secret": "hello"
   }
 }

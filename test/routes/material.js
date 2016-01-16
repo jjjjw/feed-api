@@ -17,7 +17,7 @@ function tearDown (done) {
     if (err) {
       done(err)
     }
-    client.query('DROP TABLE material;', (err, result) => {
+    client.nonQuery('DROP TABLE material;', (err, result) => {
       close()
       done(err)
     })
@@ -29,7 +29,7 @@ function setUp (done) {
     if (err) {
       done(err)
     }
-    client.query(materialTable, (err, result) => {
+    client.nonQuery(materialTable, (err, result) => {
       close()
       done(err)
     })
