@@ -1,6 +1,6 @@
 {
   "pg": {
-    "conStr": "postgres://localhost:5432/txt"
+    "conStr": "postgres://localhost:5432/feed"
   },
   "koa": {
     "port": 3001

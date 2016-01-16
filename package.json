@@ -1,5 +1,5 @@
 {
-  "name": "txt-api",
+  "name": "feed-api",
   "version": "0.0.0",
   "description": "A text website",
   "main": "index.js",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zjjw/txt-api.git"
+    "url": "git+https://github.com/zjjw/feed-api.git"
   },
   "keywords": [
     "parens"
@@ -18,9 +18,9 @@
   "author": "JJ Weber",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/zjjw/txt-api/issues"
+    "url": "https://github.com/zjjw/feed-api/issues"
   },
-  "homepage": "https://github.com/zjjw/txt-api#readme",
+  "homepage": "https://github.com/zjjw/feed-api#readme",
   "dependencies": {
     "babel-core": "^6.3.21",
     "babel-preset-es2015": "^6.3.13",
